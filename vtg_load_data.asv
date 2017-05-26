@@ -27,7 +27,7 @@ for i = 1:length(quatdata)
 end
 %euldata = vtg_quat2eul(quatdata);
 t = imudata(:,1); %Time Variable
-pdegree = 4; %Polyfit Degree of X
+pdegree = 1; %Polyfit Degree of X
 % Acceleration Polyfit
 px = polyfit(imudata(:,1), imudata(:,3), pdegree);
 ppx = polyval(px, t);
@@ -64,6 +64,10 @@ xlabel('Time (s)');
 ylabel('Displacement (m)');
 legend('x', 'y', 'z');  
 
+% Plot XYZ Displacement
+[X, Y, Z] = meshgrid(rrx, rry, rrz);
+G = X.^2 + Y.^2 + Z.^2;
+gridsize = size(G);
 
 % Plot raw imu data
 % Accelerations
@@ -89,13 +93,3 @@ plot(quatdata(:,1), euldata);
 xlabel('Time (s)');
 ylabel('Orientation (deg)');
 legend('roll', 'pitch', 'yaw');
-
-% Plot XYZ Displacement
-figure 
-plot3(rrx, rry, rrz);
-grid on
-pbaspect([1 1 1])
-xlabel('X Displacement (m)');
-ylabel('Y Displacement (m)');
-zlabel('Z Displacement (m)');
-
