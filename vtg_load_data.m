@@ -27,15 +27,15 @@ for i = 1:length(quatdata)
 end
 %euldata = vtg_quat2eul(quatdata);
 t = imudata(:,1); %Time Variable
-
+pdegree = 2; %Polyfit Degree of X
 % Acceleration Polyfit
-px = polyfit(imudata(:,1), imudata(:,3), 5);
+px = polyfit(imudata(:,1), imudata(:,3), pdegree);
 ppx = polyval(px, t);
 
-py = polyfit(imudata(:,1), imudata(:,4), 5);
+py = polyfit(imudata(:,1), imudata(:,4), pdegree);
 ppy = polyval(py, t);
 
-pz = polyfit(imudata(:,1), imudata(:,5), 5);
+pz = polyfit(imudata(:,1), imudata(:,5), pdegree);
 ppz = polyval(pz, t);
 
 % 1st Integrals
