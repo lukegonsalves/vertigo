@@ -26,24 +26,64 @@ for i = 1:length(quatdata)
     euldata(i,:) = vtg_quat2eul(quatdata(i,3:6));
 end
 %euldata = vtg_quat2eul(quatdata);
+t = imudata(:,1); %Time Variable
+
+% Acceleration Polyfit
+px = polyfit(imudata(:,1), imudata(:,3), 5);
+ppx = polyval(px, t);
+
+py = polyfit(imudata(:,1), imudata(:,4), 5);
+ppy = polyval(py, t);
+
+pz = polyfit(imudata(:,1), imudata(:,5), 5);
+ppz = polyval(pz, t);
+
+% 1st Integrals
+qx = polyint(px);
+qqx = polyval(qx, t);
+qy = polyint(py);
+qqy = polyval(qy, t);
+qz = polyint(pz);
+qqz = polyval(qz, t);
+subplot(5,1,2);
+plot(t, qqx, t, qqy, t, qqz);
+xlabel('Time (s)');
+ylabel('Velocity (ms^-1)');
+legend('x', 'y', 'z');  
+
+% 2nd Integrals
+rx = polyint(qx);
+rrx = polyval(rx, t);
+ry = polyint(qy);
+rry = polyval(ry, t);
+rz = polyint(qz);
+rrz = polyval(rz, t);
+subplot(5,1,1);
+plot(t, rrx, t, rry, t, rrz);
+xlabel('Time (s)');
+ylabel('Displacement (m)');
+legend('x', 'y', 'z');  
 
 % Plot raw imu data
 % Accelerations
-subplot(3,1,1);
+subplot(5,1,3);
 plot(imudata(:,1), imudata(:,3:5));
+% Plot Acceleration Regression Line
+hold on;
+plot(t, ppx, '--', t, ppy, '--', t, ppz, '--');
 xlabel('Time (s)');
 ylabel('Acceleration (g)');
 legend('x', 'y', 'z');
 
 % Rate gyros
-subplot(3,1,2);
+subplot(5,1,4);
 plot(imudata(:,1), imudata(:,6:8));
 xlabel('Time (s)');
 ylabel('Gyro (deg/s)');
 legend('x', 'y', 'z');
 
 % Plot DMP data
-subplot(3,1,3);
+subplot(5,1,5);
 plot(quatdata(:,1), euldata);
 xlabel('Time (s)');
 ylabel('Orientation (deg)');
