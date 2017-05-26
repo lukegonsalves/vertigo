@@ -2,7 +2,7 @@
 %
 % Jon Sowman 2017
 % jon+vertigo@jonsowman.com
-
+% Luke Gonsalves 2017
 % Get raw data
 [csvfile, csvpath] = uigetfile('*.csv');
 csvdata = csvread([csvpath csvfile]);
@@ -27,25 +27,34 @@ for i = 1:length(quatdata)
 end
 %euldata = vtg_quat2eul(quatdata);
 t = imudata(:,1); %Time Variable
-pdegree = 4; %Polyfit Degree of X
+p0degree = 5; %Polyfit Degree of X
 % Acceleration Polyfit
-px = polyfit(imudata(:,1), imudata(:,3), pdegree);
+px = polyfit(imudata(:,1), imudata(:,3), p0degree);
 ppx = polyval(px, t);
 
-py = polyfit(imudata(:,1), imudata(:,4), pdegree);
+py = polyfit(imudata(:,1), imudata(:,4), p0degree);
 ppy = polyval(py, t);
 
-pz = polyfit(imudata(:,1), imudata(:,5), pdegree);
+pz = polyfit(imudata(:,1), imudata(:,5), p0degree);
 ppz = polyval(pz, t);
 
+% Cleaned Accelerations var
+xclean = imudata(:,3)-ppx;
+yclean = imudata(:,4)-ppy;
+zclean = imudata(:,5)-ppz;
+
 % 1st Integrals
-qx = polyint(px);
-qqx = polyval(qx, t);
-qy = polyint(py);
-qqy = polyval(qy, t);
-qz = polyint(pz);
-qqz = polyval(qz, t);
-subplot(5,1,2);
+p1degree = 5;
+ix = polyfit(imudata(:,1), xclean, p1degree);
+qx = polyint(ix);
+qqx = polyval(ix, t);
+iy = polyfit(imudata(:,1), yclean, p1degree);
+qy = polyint(iy);
+qqy = polyval(iy, t);
+iz = polyfit(imudata(:,1), zclean, p1degree);
+qz = polyint(iz);
+qqz = polyval(iz, t);
+subplot(4,1,1);
 plot(t, qqx, t, qqy, t, qqz);
 xlabel('Time (s)');
 ylabel('Velocity (ms^-1)');
@@ -58,16 +67,33 @@ ry = polyint(qy);
 rry = polyval(ry, t);
 rz = polyint(qz);
 rrz = polyval(rz, t);
-subplot(5,1,1);
+subplot(4,1,2);
 plot(t, rrx, t, rry, t, rrz);
 xlabel('Time (s)');
 ylabel('Displacement (m)');
 legend('x', 'y', 'z');  
 
+% Cleaned Accelerations
+subplot(4,1,3);
+plot(t, xclean, t, yclean, t, zclean);
+xlabel('Time (s)');
+ylabel('Acceleration (m)');
+legend('x', 'y', 'z');  
+
+% Accelerations
+subplot(4,1,4);
+plot(imudata(:,1), imudata(:,3:5));
+% Plot Acceleration Regression Line
+hold on;
+plot(t, ppx, '--', t, ppy, '--', t, ppz, '--');
+xlabel('Time (s)');
+ylabel('Acceleration (g)');
+legend('x', 'y', 'z');
 
 % Plot raw imu data
 % Accelerations
-subplot(5,1,3);
+figure
+subplot(3,1,1);
 plot(imudata(:,1), imudata(:,3:5));
 % Plot Acceleration Regression Line
 hold on;
@@ -77,14 +103,14 @@ ylabel('Acceleration (g)');
 legend('x', 'y', 'z');
 
 % Rate gyros
-subplot(5,1,4);
+subplot(3,1,2);
 plot(imudata(:,1), imudata(:,6:8));
 xlabel('Time (s)');
 ylabel('Gyro (deg/s)');
 legend('x', 'y', 'z');
 
 % Plot DMP data
-subplot(5,1,5);
+subplot(3,1,3);
 plot(quatdata(:,1), euldata);
 xlabel('Time (s)');
 ylabel('Orientation (deg)');
